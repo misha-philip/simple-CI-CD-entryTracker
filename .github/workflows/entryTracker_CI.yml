@@ -78,7 +78,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start Docker Compose for E2E test
-        run: docker compose up --build -d
+        run: docker compose up --build
 
       - name: Wait for app to be healthy
         run: |
@@ -118,8 +118,47 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            mkdir -p /home/ubuntu/entrytracker
             cd /home/ubuntu/entrytracker
-            git pull origin main
+            if [ ! -d .git ]: then
+              git clone https://github.com/misha-philip/simple-CI-CD-entryTracker.git .
+            fi
+            cat > docker-compose.yaml << 'EOF'
+            services:
+              entrytracker:
+                image: 923918898299.dkr.ecr.ap-south-1.amazonaws.com/entrytracker/entrytracker:latest
+                container_name: entrytracker-app
+                environment:
+                  DB_HOST: mysql 
+                  DB_USER: root   
+                  DB_PASSWORD: password
+                  DB_NAME: app_db
+                ports:
+                  - "5000:5000"
+                depends_on:
+                  - mysql
+                healthcheck:
+                  test: ["CMD", "curl", "--fail", "http://localhost:5000/"]
+                  interval: 1m30s
+                  timeout: 30s
+                  retries: 5
+                  start_period: 30s
+
+
+              mysql:
+                image: mysql:5.7
+                container_name: mysql
+                environment:
+                  MYSQL_ROOT_PASSWORD: password
+                  MYSQL_DATABASE: app_db
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - db-data:/var/lib/mysql
+
+            volumes:
+              db-data:
+            'EOF'
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 923918898299.dkr.ecr.ap-south-1.amazonaws.com
             docker-compose pull
             docker-compose down

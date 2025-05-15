@@ -120,7 +120,7 @@ jobs:
           script: |
             mkdir -p /home/ubuntu/entrytracker
             cd /home/ubuntu/entrytracker
-            if [ ! -d .git ]: then
+            if [ ! -d .git ]; then
               git clone https://github.com/misha-philip/simple-CI-CD-entryTracker.git .
             fi
             cat > docker-compose.yaml << 'EOF'

@@ -1,6 +1,7 @@
 services:
   entrytracker:
-    image: 923918898299.dkr.ecr.ap-south-1.amazonaws.com/entrytracker/entrytracker:latest
+    build: .
+    #image: 923918898299.dkr.ecr.ap-south-1.amazonaws.com/entrytracker/entrytracker:latest
     container_name: entrytracker-app
     environment:
       DB_HOST: mysql 

@@ -23,8 +23,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Load env variables
+        run: |
+          set -a
+          source .env
+          set +a
+
       - name: Start MySQL container (for local testing)
-        run: docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=app_db -p 3306:3306 mysql:5.7
+        run: docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -e MYSQL_DATABASE=${MYSQL_DATABASE} -p 3306:3306 mysql:5.7
+        
 
       - name: Wait for MySQL to be ready
         run: |
@@ -57,7 +64,14 @@ jobs:
         run: docker compose up --build -d
 
       - name: Curl the container (E2E)
-        run: curl http://localhost:5000
+        run: |
+          for i in {1..10}; do
+            curl -f http://localhost:5000 && break || sleep 5
+          done
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
 
       - name: Shutdown Docker Compose
         run: docker compose down

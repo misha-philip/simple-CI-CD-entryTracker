@@ -131,6 +131,6 @@ jobs:
               db-data:
             'EOF'
             aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 923918898299.dkr.ecr.ap-south-1.amazonaws.com
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            docker compose pull
+            docker compose down
+            docker compose up -d

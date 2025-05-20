@@ -32,6 +32,9 @@ jobs:
       - name: Start MySQL container (for local testing)
         run: docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -e MYSQL_DATABASE=${DB_NAME} -p 3306:3306 mysql:5.7
         
+      - name: Show MySQL logs on failure
+        if: failure()
+        run: docker logs mysql
 
       - name: Wait for MySQL to be ready
         run: |
